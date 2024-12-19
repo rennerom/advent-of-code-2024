@@ -1,1 +1,6 @@
 .Rproj.user
+scratch/*
+scratch/sample.txt
+
+# ignore .Renviron file
+.Renviron
