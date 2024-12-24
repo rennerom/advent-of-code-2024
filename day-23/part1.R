@@ -7,10 +7,6 @@ input <- fetch_raw_input_data(2024, 23) |>
   tibble::as_tibble() |> 
   tidyr::separate_wider_delim(value, names = c("parent", "child"), delim = "-")
 
-input <- readr::read_lines("day-23/sample.txt") |> 
-  tibble::as_tibble() |> 
-  tidyr::separate_wider_delim(value, names = c("parent", "child"), delim = "-")
-
 g <- igraph::graph_from_data_frame(input, directed = FALSE)
 
 cliques <- 
