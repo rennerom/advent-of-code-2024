@@ -95,3 +95,20 @@ fetch_raw_input_data <- function(year, day, cookie) {
   }
   return(content)
 }
+
+#' Print the answer to an Advent of Code challenge
+#' 
+#' @description
+#' Pipe in the answer to an Advent of Code challenge and print it with a message.
+#' 
+#' @param x The answer to the Advent of Code challenge.
+#' @return NULL
+#' @examples
+#' # Print the answer to an Advent of Code challenge
+#' answer <- 42
+#' answer |> print_answer()
+#' 
+#' @export
+print_answer <- function(x, text = "answer") {
+  stringr::str_glue("{text}: {x}") |> print()
+}

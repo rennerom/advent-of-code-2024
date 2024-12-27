@@ -1,42 +1,38 @@
-box::use(R/aoc [fetch_raw_input_data])
+box::use(R/aoc [fetch_raw_input_data, print_answer])
 
-input <- fetch_raw_input_data(2024, 25) |>
-  stringr::str_split("\n") |>
+input <-
+  fetch_raw_input_data(2024, 25) |>
+  stringr::str_remove("\\n$") |>
+  stringr::str_split("\n\n") |>
   unlist() |>
-  purrr::reduce(
-    .init = list(list()),
-    ~ if (.y == "") {
-      append(.x, list(list()))
-    } else {
-      # append to existing, don't create a new list
-      .x[[length(.x)]] <- append(.x[[length(.x)]], .y)
-      .x
-    }
-  ) |>
-  purrr::discard(~ length(.x) == 0)
+  purrr::map(~ stringr::str_split(.x, "\n") |> unlist()) |>
+  purrr::map(~ as.list(.x))
 
-keys <- list()
-locks <- list()
+keys <-
+  input |>
+  purrr::map(~ if (stringr::str_detect(.x[[1]], "^#+$")) {
+    purrr::map(.x, ~ stringr::str_split(.x, "")[[1]]) |>
+      purrr::transpose() |>
+      purrr::map(~ sum(.x == "#") - 1)
+  }) |> 
+  purrr::discard(~ is.null(.x))
 
-for (i in seq_along(input)) {
-  code <- input[[i]] |> 
-    purrr::map(~ stringr::str_split(.x, "")[[1]]) |> 
-    purrr::transpose() |>
-    purrr::map(~ sum(.x == "#") - 1)
-  if (stringr::str_detect(input[[i]][1], "^#+$")) {
-    locks <- append(list(code), locks)
-  } else {
-    keys <- append(list(code), keys)
-  }
-}
+locks <-
+  input |>
+  purrr::map(~ if (!(stringr::str_detect(.x[[1]], "^#+$"))) {
+    purrr::map(.x, ~ stringr::str_split(.x, "")[[1]]) |>
+      purrr::transpose() |>
+      purrr::map(~ sum(.x == "#") - 1)
+  }) |> 
+  purrr::discard(~ is.null(.x))
 
-result <- tidyr::expand_grid(keys, locks) |> 
+tidyr::expand_grid(locks, keys) |>
   dplyr::mutate(
     fit = purrr::pmap_lgl(
-      list(keys, locks),
+      list(locks, keys),
       ~all(purrr::map2_lgl(.x, .y, ~ .x + .y <= 5))
     )
-  ) |> 
-  dplyr::pull(fit) |> sum()
-
-glue::glue("answer: {result}")
+  ) |>
+  dplyr::pull(fit) |>
+  sum() |>
+  print_answer()
